@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WBR 실기체 테스트 TDL</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+KR:wght@300;400;500;600&display=swap');
+  :root {
+    --bg:#0d0f14;--bg2:#161820;--bg3:#1e2028;--border:#2a2d38;
+    --text:#e2e4ec;--text2:#8b8fa8;--text3:#555870;
+    --accent:#4f9cf9;--accent2:#7c6af7;--green:#3dd68c;
+    --yellow:#f5c842;--red:#f26e6e;--orange:#f0944d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans KR',sans-serif;font-size:14px;line-height:1.7;padding:48px 24px;}
+  .container{max-width:860px;margin:0 auto;}
+  .header{border-left:3px solid var(--accent);padding-left:20px;margin-bottom:48px;}
+  .header .label{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+  .header h1{font-size:26px;font-weight:600;margin-bottom:6px;}
+  .header p{color:var(--text2);font-size:13px;}
+  .header .changelog{margin-top:12px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);border-left:2px solid var(--border);padding-left:12px;}
+  .header .changelog span{color:var(--green);}
+  .phase{margin-bottom:40px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+  .phase-header{display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--bg2);border-bottom:1px solid var(--border);}
+  .phase-num{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--bg);background:var(--accent);border-radius:4px;padding:3px 8px;flex-shrink:0;}
+  .phase-num.orange{background:var(--orange);}
+  .phase-num.purple{background:var(--accent2);}
+  .phase-num.green{background:var(--green);color:#0d0f14;}
+  .phase-title{font-size:15px;font-weight:600;}
+  .phase-subtitle{font-size:12px;color:var(--text2);margin-left:auto;font-family:'IBM Plex Mono',monospace;}
+  .task{padding:18px 20px;border-bottom:1px solid var(--border);}
+  .task:last-child{border-bottom:none;}
+  .task-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;}
+  .task-idx{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text3);min-width:32px;padding-top:2px;}
+  .task-title{font-size:14px;font-weight:500;}
+  .task-body{padding-left:44px;}
+  .code{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#a8d4ff;margin:8px 0;line-height:1.8;overflow-x:auto;}
+  .code .comment{color:var(--text3);}
+  .code .cmd{color:var(--green);}
+  .code .file{color:var(--yellow);}
+  .code .val{color:var(--orange);}
+  .desc{color:var(--text2);font-size:13px;margin:6px 0;}
+  .judge-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;}
+  .judge-table th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);}
+  .judge-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .judge-table tr:last-child td{border-bottom:none;}
+  .symptom{color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;}
+  .cause{color:var(--text2);}
+  .action{color:var(--accent);font-size:12px;}
+  .badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;margin-left:4px;vertical-align:middle;}
+  .badge.ok{background:rgba(61,214,140,0.15);color:var(--green);}
+  .badge.warn{background:rgba(240,148,77,0.15);color:var(--orange);}
+  .badge.danger{background:rgba(242,110,110,0.15);color:var(--red);}
+  .badge.info{background:rgba(79,156,249,0.15);color:var(--accent);}
+  .pipeline{display:flex;flex-direction:column;gap:0;margin:10px 0;}
+  .pipe-step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;position:relative;}
+  .pipe-step::before{content:'';position:absolute;left:9px;top:28px;bottom:-8px;width:1px;background:var(--border);}
+  .pipe-step:last-child::before{display:none;}
+  .pipe-dot{width:18px;height:18px;border-radius:50%;background:var(--bg3);border:2px solid var(--accent);flex-shrink:0;margin-top:2px;}
+  .pipe-dot.yellow{border-color:var(--yellow);}
+  .pipe-dot.green{border-color:var(--green);}
+  .pipe-dot.teal{border-color:#2dd4bf;}
+  .pipe-content{flex:1;}
+  .pipe-label{font-size:13px;font-weight:500;color:var(--text);}
+  .pipe-detail{font-size:12px;color:var(--text2);font-family:'IBM Plex Mono',monospace;}
+  .checklist{list-style:none;margin:8px 0;}
+  .checklist li{padding:5px 0;font-size:13px;color:var(--text2);display:flex;align-items:flex-start;gap:8px;}
+  .checklist li::before{content:'□';color:var(--text3);font-size:12px;flex-shrink:0;margin-top:1px;}
+  .branch{background:rgba(79,156,249,0.06);border:1px solid rgba(79,156,249,0.25);border-radius:8px;padding:14px 16px;margin:10px 0;}
+  .branch-title{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+  .loop-box{background:rgba(45,212,191,0.06);border:1px solid rgba(45,212,191,0.3);border-radius:8px;padding:14px 16px;margin:10px 0;}
+  .loop-title{font-size:12px;font-weight:600;color:#2dd4bf;margin-bottom:8px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+  .note{background:rgba(245,200,66,0.07);border-left:3px solid var(--yellow);padding:10px 14px;border-radius:0 6px 6px 0;margin:10px 0;font-size:13px;color:var(--text2);}
+  .warn-box{background:rgba(242,110,110,0.07);border-left:3px solid var(--red);padding:10px 14px;border-radius:0 6px 6px 0;margin:10px 0;font-size:13px;color:var(--text2);}
+  .divider{border:none;border-top:1px solid var(--border);margin:2px 0;}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="label">WBR Project · 2조</div>
+    <h1>실기체 테스트 TDL</h1>
+    <p>BLE 기반 휠-이족 로봇 밸런싱 제어 검증 절차 · PSRAM/Logger/BLE 세팅 완료 기준</p>
+    <div class="changelog">
+      rev2 — <span>VI 배제</span> (Phase 3, 2-5 삭제) · <span>R/Q 튜닝 루프 (2-2a) 추가</span>
+    </div>
+  </div>
+
+  <!-- PHASE 0 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num orange">PHASE 0</span>
+      <span class="phase-title">모듈 세팅 및 사전 검증</span>
+      <span class="phase-subtitle">최우선 · 이후 모든 단계의 전제</span>
+    </div>
+    <div class="phase-body">
+
+      <div class="task">
+        <div class="task-header">
+          <span class="task-idx">0-1</span>
+          <span class="task-title">PSRAM + Logger.h 동작 확인</span>
+        </div>
+        <div class="task-body">
+          <p class="desc">Arduino IDE → Tools → PSRAM → OPI PSRAM 선택 후 플래시. setup()에서 PSRAM 초기화 확인.</p>
+          <div class="code">
+<span class="comment">// setup() Serial 출력으로 확인</span>
+<span class="cmd">if</span> (psramFound()) {
+    Serial.printf(<span class="val">"PSRAM: %d bytes\n"</span>, ESP.getPsramSize());
+} <span class="cmd">else</span> {
+    Serial.println(<span class="val">"PSRAM not found!"</span>);  <span class="comment">// → 보드 설정 재확인</span>
+}
+          </div>
+          <p class="desc">WiFi 연결 후 브라우저에서 CSV 수신까지 확인</p>
+          <div class="code">
+<span class="comment"># 브라우저에서 접속</span>
+http://[Serial에서 확인한 ESP32 IP]/logdata
+<span class="comment">→ CSV 파일 다운로드 되면 OK</span>
+          </div>
+          <ul class="checklist">
+            <li>Serial에 PSRAM 크기 출력됨 (약 8MB)</li>
+            <li>WiFi 연결 후 IP 출력됨</li>
+            <li>브라우저에서 /logdata 접속 시 CSV 다운로드 됨</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="task">
+        <div class="task-header">
+          <span class="task-idx">0-2</span>
+          <span class="task-title">Off 모드 LogData() 호출 확인</span>
+        </div>
+        <div class="task-body">
+          <p class="desc">현재 코드에서 Off 모드 <code>else</code> 블록 끝에 <code>LogData()</code> 호출이 있는지 확인. 없으면 추가.</p>
+          <div class="code">
+<span class="comment">// WBR_Control.cpp - Off 모드 else 블록 끝</span>
+dbgHeight();
+<span class="cmd">LogData</span>();  <span class="comment">// ← 이미 있음. 없으면 추가</span>
+          </div>
+          <div class="note">Off 모드에서 sendReadStateCommand() 미호출이므로 z[6],[7]은 갱신 안 됨 (0 유지). IMU 바이어스 측정 CSV 용도로는 문제없음.</div>
+        </div>
+      </div>
+
+      <div class="task">
+        <div class="task-header">
+          <span class="task-idx">0-3</span>
+          <span class="task-title">BLE 모듈 실기체 검증</span>
+        </div>
+        <div class="task-body">
+          <p class="desc">Python GUI 실행 후 연결 및 커맨드 파싱 확인. Serial Monitor에서 반응 검증.</p>
+          <div class="code">
+<span class="comment"># Python GUI 실행</span>
+<span class="cmd">python</span> esp32_ble_motor_controller_limited.py
+
+<span class="comment"># Custom Command 창에서 순서대로 전송 → Serial 반응 확인</span>
+<span class="cmd">run</span>      <span class="comment">→ _isRun = true</span>
+<span class="cmd">v 0.3</span>    <span class="comment">→ _v_d = 0.300</span>
+<span class="cmd">yaw 0.2</span>  <span class="comment">→ _dpsi_d = 0.200</span>
+<span class="cmd">h 0.15</span>   <span class="comment">→ _h_d = 0.150</span>
+<span class="cmd">stop</span>     <span class="comment">→ _isRun = false, 토크 0</span>
+<span class="cmd">reset</span>    <span class="comment">→ _isReset = true</span>
+          </div>
+          <ul class="checklist">
+            <li>Scan → ESP32_WBR_Control 검색됨</li>
+            <li>Connect 성공</li>
+            <li>각 커맨드 전송 후 BLE TX 알림 확인됨</li>
+            <li>stop 전송 시 토크 0 확인</li>
+          </ul>
+          <div class="warn-box">이 단계 통과 전까지 Run 모드 진입 금지. BLE가 동작 안 하면 비상 정지 불가.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num">PHASE 1</span>
+      <span class="phase-title">Off 모드 기체 점검</span>
+      <span class="phase-subtitle">토크 없음 · CSV 로깅</span>
+    </div>
+    <div class="phase-body">
+
+      <div class="task">
+        <div class="task-header">
+          <span class="task-idx">1-1</span>
+          <span class="task-title">IMU 바이어스 측정 및 하드코딩</span>
+        </div>
+        <div class="task-body">
+          <p class="desc">로봇을 수평한 바닥에 완전 정지 상태로 30초 유지 → Off 모드 CSV 수집 → MATLAB에서 평균 계산</p>
+          <div class="code">
+<span class="comment">% MATLAB Command Window</span>
+data = readtable(<span class="val">'off_mode_static.csv'</span>);
+<span class="cmd">fprintf</span>(<span class="val">'gyro_bias: %.8f, %.8f, %.8f\n'</span>, ...
+    mean(data.gyr_x), mean(data.gyr_y), mean(data.gyr_z))
+<span class="comment">% acc_z 바이어스 = 실측 평균 - 9.80665</span>
+<span class="cmd">fprintf</span>(<span class="val">'accel_bias: %.8f, %.8f, %.8f\n'</span>, ...
+    mean(data.acc_x), mean(data.acc_y), mean(data.acc_z) - <span class="val">9.80665</span>)
+          </div>
+          <p class="desc">결과를 <span style="color:var(--yellow)">IMU.h</span>에 하드코딩 후 재플래시</p>
+          <div class="code">
+<span class="comment">// IMU.h</span>
+Eigen::Vector3f gyro_bias{ <span class="val">gyr_x평균</span>, <span class="val">gyr_y평균</span>, <span class="val">gyr_z평균</span> };
+Eigen::Vector3f accel_bias{ <span class="val">acc_x평균</span>, <span class="val">acc_y평균</span>, <span class="val">acc_z평균 - 9.80665</span> };
+          </div>
+          <div class="note">현재 코드에 바이어스가 이미 하드코딩돼 있음. 실기체에서 재측정한 값으로 덮어쓸 것.</div>
+        </div>
+      </div>
+
+      <div class="task">
+        <div class="task-header">
+          <span class="task-idx">1-2</span>
+          <span class="task-title">theta_hat 안정성 확인 (EKF 품질)</span>
+        </div>
+        <div class="task-body">
+          <p class="desc">손으로 수직으로 세운 상태에서 30초 Off 모드 유지 → CSV 수집 → MATLAB Filter_Test.m으로 분석</p>
+          <div class="code">
+<span class="comment">% Filter_Test.m 상단 수정</span>
+filename = <span class="val">'off_mode_upright.csv'</span>;
+<span class="comment">% Tab1: theta_hat(빨강) vs theta_hat_cal(파랑) 비교</span>
+<span class="comment">% 두 선이 겹치면 EKF 정상</span>
+          </div>
+          <div class="note">Filter_Test.m 26번째 줄: <code>data.theta_eq</code> → <code>data.theta_d</code>로 수정 필요 (컬럼명 불일치).</div>
+          <table class="judge-table">
+            <tr><th>증상</th><th>판단</th><th>조치</th></tr>
+            <tr>
+              <td class="symptom">빨강 ≈ 파랑, 값 일정</td>
+              <td class="cause">EKF 정상</td>
+              <td class="action"><span class="badge ok">OK</span> 다음 단계</td>
+            </tr>
+            <tr>
+              <td class="symptom">빨강 ≠ 파랑</td>
+              <td class="cause">R_cov/Q_cov 불일치</td>
+              <td class="action"><span class="badge warn">수정</span> Filter_Test.m에서 R_cov/Q_cov 조정 → EKF.h 수정 → 재플래시</td>
+            </tr>
+            <tr>
+              <td class="symptom">값이 발산</td>
+              <td class="cause">IMU 바이어스 미수정</td>
+              <td class="action"><span class="badge danger">1-1 재실행</span> 바이어스 재측정 후 재시도</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="task">
+        <div class="task-header">
+          <span class="task-idx">1-3</span>
+          <span class="task-title">theta_hat 수렴값 vs theta_eq 비교 (CoM 편차)</span>
+        </div>
+        <div class="task-body">
+          <p class="desc">1-2 CSV에서 theta_hat 평균값을 구하고 모델의 균형각과 비교한다.</p>
+          <div class="code">
+<span class="comment">% MATLAB Command Window</span>
+data = readtable(<span class="val">'off_mode_upright.csv'</span>);
+theta_hat_measured = mean(data.theta_hat) * <span class="val">180</span>/pi
+
+load(<span class="val">'dynamic_properties.mat'</span>);
+load(<span class="val">'dynamics_functions.mat'</span>);
+model = Pol(properties, dynamic_functions);
+theta_eq_ref = model.get_theta_eq(<span class="val">0.2</span>, <span class="val">0</span>) * <span class="val">180</span>/pi
+<span class="comment">% → -0.55° 근방이어야 함</span>
+
+delta = theta_hat_measured - theta_eq_ref
+<span class="comment">% → 이 값이 CoM 편차</span>
+          </div>
+          <table class="judge-table">
+            <tr><th>delta 범위</th><th>판단</th><th>조치</th></tr>
+            <tr>
+              <td class="symptom">|delta| &lt; 1°</td>
+              <td class="cause">CoM 정상</td>
+              <td class="action"><span class="badge ok">OK</span> 게인 그대로 사용</td>
+            </tr>
+            <tr>
+              <td class="symptom">1° ≤ |delta| &lt; 2°</td>
+              <td class="cause">경계선</td>
+              <td class="action"><span class="badge warn">HOLD</span> Run 모드 테스트 후 판단</td>
+            </tr>
+            <tr>
+              <td class="symptom">|delta| ≥ 2°</td>
+              <td class="cause">CoM 쏠림</td>
+              <td class="action"><span class="badge danger">수정 필요</span> 아래 CoM 수정 파이프라인 실행</td>
+            </tr>
+          </table>
+
+          <div class="branch">
+            <div class="branch-title">▸ CoM 수정 파이프라인 (|delta| ≥ 2° 일 때)</div>
+            <div class="pipeline">
+              <div class="pipe-step">
+                <div class="pipe-dot yellow"></div>
+                <div class="pipe-content">
+                  <div class="pipe-label">Step 1. CoM_x 역산</div>
+                  <div class="code" style="margin-top:6px">
+<span class="comment">% MATLAB</span>
+h = <span class="val">0.2</span>;
+theta_eq_measured = theta_hat_measured * pi/<span class="val">180</span>;
+CoM_z_ref = <span class="val">0.03492</span>;
+CoM_x_new = -tan(theta_eq_measured) * (h + CoM_z_ref)
+<span class="comment">% → 새 CoM_x 값 (m 단위) 메모</span>
+                  </div>
+                </div>
+              </div>
+              <div class="pipe-step">
+                <div class="pipe-dot yellow"></div>
+                <div class="pipe-content">
+                  <div class="pipe-label">Step 2. generate_dynamic_properties.m 수정 후 실행</div>
+                  <div class="code" style="margin-top:6px">
+<span class="comment">% center_of_mass_MainBody x 성분만 교체 (mm 단위)</span>
+center_of_mass_MainBody = [<span class="val">CoM_x_new * 1000</span>;
+                            <span class="val">-0.22808627</span>;
+                            <span class="val">34.91864017</span>];
+<span class="comment">% 실행 → dynamic_properties.mat 갱신</span>
+                  </div>
+                </div>
+              </div>
+              <div class="pipe-step">
+                <div class="pipe-dot yellow"></div>
+                <div class="pipe-content">
+                  <div class="pipe-label">Step 3. LQR_GainGenerator.m 실행</div>
+                  <div class="code" style="margin-top:6px">
+Q_ = diag([<span class="val">100</span>, <span class="val">0</span>, <span class="val">20</span>, <span class="val">5</span>]);
+R_ = diag([<span class="val">150</span>, <span class="val">150</span>]);
+<span class="comment">% → Command Window에 C++ 코드 출력됨</span>
+                  </div>
+                </div>
+              </div>
+              <div class="pipe-step">
+                <div class="pipe-dot green"></div>
+                <div class="pipe-content">
+                  <div class="pipe-label">Step 4. VYBController.h Ks 배열 교체 후 재플래시</div>
+                  <div class="code" style="margin-top:6px">
+<span class="comment">// 기존 14개 Ks.push_back 블록 전체 삭제 후 붙여넣기</span>
+<span class="comment">// 재플래시 후 1-2, 1-3 재확인</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PHASE 2 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-num purple">PHASE 2</span>
+      <span class="phase-title">Run 모드 테스트</span>
+      <span class="phase-subtitle">토크 활성 · PSRAM 로깅</span>
+    </div>
+    <div class="phase-body">
+
+      <div class="task">
+        <div class="task-header">
+          <span class="task-idx">2-1</span>
+          <span class="task-title">첫 기립 테스트</span>
+        </div>
+        <div class="task-body">
+          <div class="code">
+<span class="comment"># 순서</span>
+<span class="val">1.</span> 손으로 로봇을 수직으로 세움
+<span class="val">2.</span> Off 모드 5~10초 대기 (EKF 수렴)
+<span class="val">3.</span> BLE GUI에서 <span class="cmd">"run"</span> 전송
+<span class="val">4.</span> 천천히 손 떼기
+          </div>
+          <table class="judge-table">
+            <tr><th>증상</th><th>원인</th><th>조치</th></tr>
+            <tr>
+              <td class="symptom">바로 쓰러짐</td>
+              <td class="cause">CoM 오차 또는 게인 문제</td>
+              <td class="action"><span class="badge danger">FAIL</span> Phase 1-3 재확인. |delta| ≥ 2°면 CoM 수정 파이프라인</td>
+            </tr>
+            <tr>
+              <td class="symptom">한쪽으로 쏠림</td>
+              <td class="cause">LW/RW factor 비대칭</td>
+              <td class="action"><span class="badge warn">조정</span> 2-3 직진 테스트 후 factor 수정</td>
+            </tr>
+            <tr>
+              <td class="symptom">진동하다 쓰러짐</td>
+              <td class="cause">LQR 게인 너무 큼</td>
+              <td class="action"><span class="badge warn">조정</span> Ks에서 k[0][0], k[0][1] 10% 감소 후 재시도</td>
+            </tr>
+            <tr>
+              <td class="symptom">안정적으로 서있음</td>
+              <td class="cause">정상</td>
+              <td class="action"><span class="badge ok">OK</span> 다음 단계</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="task">
+        <div class="task-header">
+          <span class="task-idx">2-2</span>
+          <span class="task-title">안정적 기립 후 CSV 수집</span>
+        </div>
+        <div class="task-body">
+          <p class="desc">서 있는 상태 10~20초 유지 → "stop" 전송 → Off 모드 전환 → CSV 수집</p>
+          <div class="code">
+<span class="comment"># CSV 수집 순서</span>
+<span class="val">1.</span> Run 모드에서 10~20초 유지
+<span class="val">2.</span> BLE GUI에서 <span class="cmd">"stop"</span> 전송
+<span class="val">3.</span> 브라우저에서 http://[ESP32_IP]/logdata 접속
+<span class="val">4.</span> run_mode_log.csv 저장
+          </div>
+          <table class="judge-table">
+            <tr><th>확인 항목 (Filter_Test.m Tab1)</th><th>정상</th><th>비정상 시</th></tr>
+            <tr>
+              <td class="symptom">theta_hat 빨강 vs 파랑</td>
+              <td class="cause">두 선이 겹침</td>
+              <td class="action">→ 2-2a R/Q 튜닝 루프 실행</td>
+            </tr>
+            <tr>
+              <td class="symptom">Tab2: h_obs vs z 잔차</td>
+              <td class="cause">각 채널 잔차 소폭 진동</td>
+              <td class="action">→ 2-2a에서 var(error) 확인 후 R 조정</td>
+            </tr>
+            <tr>
+              <td class="symptom">Tab3: tau_RW / tau_LW</td>
+              <td class="cause">±MAX_TORQUE 미만</td>
+              <td class="action">포화 시 Params.h MAX_TORQUE 증가 또는 게인 감소</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="task">
+        <div class="task-header">
+          <span class="task-idx">2-2a</span>
+          <span class="task-title">EKF R/Q 튜닝 루프</span>
+        </div>
+        <div class="task-body">
+          <p class="desc">2-2 CSV를 Filter_Test.m에 넣어 잔차 분산을 측정하고 R_cov를 수렴할 때까지 반복 조정한다.</p>
+
+          <div class="loop-box">
+            <div class="loop-title">↻ 튜닝 루프</div>
+            <div class="pipeline">
+              <div class="pipe-step">
+                <div class="pipe-dot teal"></div>
+                <div class="pipe-content">
+                  <div class="pipe-label">Filter_Test.m 실행 → var(error) 확인</div>
+                  <div class="code" style="margin-top:6px">
+<span class="comment">% Filter_Test.m 상단</span>
+filename = <span class="val">'run_mode_log.csv'</span>;
+
+<span class="comment">% Command Window 출력 (루프 끝 자동 출력)</span>
+<span class="comment">% error = h_obs - z;  var(error(i,:)) for i=1:8</span>
+<span class="comment">% → 각 채널 분산값이 R 대각 초기값</span>
+                  </div>
+                </div>
+              </div>
+              <div class="pipe-step">
+                <div class="pipe-dot teal"></div>
+                <div class="pipe-content">
+                  <div class="pipe-label">R_cov 대각 업데이트</div>
+                  <div class="code" style="margin-top:6px">
+<span class="comment">% Filter_Test.m 내 R_cov 수정</span>
+R_cov = diag([<span class="val">var1</span>, <span class="val">var2</span>, <span class="val">var3</span>,
+              <span class="val">var4</span>, <span class="val">var5</span>, <span class="val">var6</span>,
+              <span class="val">var7</span>, <span class="val">var8</span>]);
+<span class="comment">% z[6],[7] (모터속도) 신뢰도 낮으면 큰 값 유지</span>
+<span class="comment">% 재실행 → Tab1 theta_hat 빨강≈파랑 수렴 확인</span>
+                  </div>
+                </div>
+              </div>
+              <div class="pipe-step">
+                <div class="pipe-dot teal"></div>
+                <div class="pipe-content">
+                  <div class="pipe-label">EKF.h R_cov / Q_cov 갱신 후 재플래시</div>
+                  <div class="code" style="margin-top:6px">
+<span class="comment">// EKF.h 생성자 R_cov 라인 교체</span>
+R_cov((Eigen::Matrix&lt;float,8,1&gt;() &lt;&lt;
+    <span class="val">r0</span>, <span class="val">r1</span>, <span class="val">r2</span>, <span class="val">r3</span>, <span class="val">r4</span>, <span class="val">r5</span>, <span class="val">r6</span>, <span class="val">r7</span>)
+    .finished().asDiagonal())
+                  </div>
+                </div>
+              </div>
+              <div class="pipe-step">
+                <div class="pipe-dot green"></div>
+                <div class="pipe-content">
+                  <div class="pipe-label">Run 모드 CSV 재수집 → Tab1 수렴 확인 → 루프 종료</div>
+                  <div class="pipe-detail">theta_hat(빨강) ≈ theta_hat_cal(파랑) 이면 완료</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="note">R 튜닝 후 Q는 응답성 조정용. Q[0](theta) 키우면 EKF가 모델 예측보다 센서를 더 신뢰. 통상 R 확정 후 Q를 조정.</div>
+        </div>
+      </div>
+
+      <div class="task">
+        <div class="task-header">
+          <span class="task-idx">2-3</span>
+          <span class="task-title">직진 테스트 (LW/RW factor 확인)</span>
+        </div>
+        <div class="task-body">
+          <div class="code">
+<span class="cmd">v 0.3</span>    <span class="comment">→ 직선으로 이동하는지 확인</span>
+          </div>
+          <table class="judge-table">
+            <tr><th>증상</th><th>조치</th></tr>
+            <tr>
+              <td class="symptom">왼쪽으로 휨</td>
+              <td class="action">VYBController.h: <code>RW_factor *= 1.05</code> → 재플래시 → 재시도</td>
+            </tr>
+            <tr>
+              <td class="symptom">오른쪽으로 휨</td>
+              <td class="action">VYBController.h: <code>LW_factor *= 1.05</code> → 재플래시 → 재시도</td>
+            </tr>
+            <tr>
+              <td class="symptom">직선으로 이동</td>
+              <td class="action"><span class="badge ok">OK</span> factor 정상</td>
+            </tr>
+          </table>
+          <div class="note">한 번에 5% 씩 조정. 조정 후 반드시 재플래시 후 재테스트.</div>
+        </div>
+      </div>
+
+      <div class="task">
+        <div class="task-header">
+          <span class="task-idx">2-4</span>
+          <span class="task-title">높이 변경 테스트</span>
+        </div>
+        <div class="task-body">
+          <div class="code">
+<span class="cmd">h 0.07</span>   <span class="comment">→ 최소 높이에서 안정적인지</span>
+<span class="cmd">h 0.13</span>   <span class="comment">→ 중간 높이</span>
+<span class="cmd">h 0.20</span>   <span class="comment">→ 최대 높이</span>
+          </div>
+          <ul class="checklist">
+            <li>각 높이에서 쓰러지지 않고 유지되는지 확인</li>
+            <li>불안정한 높이 구간 파악 → 해당 구간 Ks 배열 게인 조정</li>
+            <li>각 높이별 CSV 수집 → Filter_Test.m으로 분석</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
