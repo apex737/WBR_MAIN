@@ -187,7 +187,7 @@ void loop()
       Pol.setHR(h_d, phi_d);           // 모델에 목표 높이와 롤 각도 설정
       Pol.calculate_com_and_inertia(); // 목표 높이 h_d가 되려면 hip 서보가 몇 도여야 하는지 계산.
       Pol.get_theta_eq(x_d(0));        // 목표 무게중심(CoM) 기준, 균형을 잡기 위한 목표 피치(θ) 계산
-      x_d(0) -= CoM_OFFSET;
+      // x_d(0) -= CoM_OFFSET;
       //// 게인 스케줄링 및 LQR 제어 (VYB) ////
       // 목표 높이(h_d)에 가장 적합한 LQR 제어 게인 행렬 K(2x4)를 보간법으로 선택
       VYB_controller.computeGainK(h_d);

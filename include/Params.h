@@ -50,7 +50,7 @@ const float dt = 0.008;  // sampling time
 // 서보 관절각 오프셋 
 // 변경 시 solve_inverse_kinematics.m 또한 바꿔야함
 const float SERVO_LINK_ANGLE = (4 * M_PI / 6);
-const float CoM_OFFSET = (-3.8f * M_PI / 180.0f);
+// const float CoM_OFFSET = (-3.8f * M_PI / 180.0f);
 
 
 // mm -> m 단위 변환 함수 (벡터)
