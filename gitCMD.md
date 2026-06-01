@@ -1,11 +1,11 @@
 # 1. Add-Commit-Push
 git add .
 git commit -m "comments"
-<!-- 항상 로컬 main → 원격 main -->
-git push origin main         
-<!-- 현재 체크아웃된 브랜치 -->
+<!-- 로컬 브랜치 → main으로 푸시 -->
+git push origin HEAD:main         
+<!-- 현재 체크아웃된 브랜치에 push -->
 git push origin HEAD         
-<!-- --set-upstream 으로 지정한 브랜치로 푸시 -->
+<!-- --set-upstream 으로 지정한 브랜치로 push -->
 git push (upstream 설정 후)    
 
 

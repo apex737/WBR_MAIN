@@ -129,7 +129,7 @@ inline Properties createDefaultProperties() {
   //                          277168.19335956f, 6416.10856472f, 8509987.98611482f)
   //                                   .finished());
   props.m_Body = G_TO_KG(1524.76209213f);  // G_TO_KG 함수에서 반환값이 float인 경우 f를 추가
-  props.CoM_Body = mmToMVector(Eigen::Matrix<float, 3, 1>(13.71923256f, -0.22808627f, 34.91864017f));
+  props.CoM_Body = mmToMVector(Eigen::Matrix<float, 3, 1>(17.3f, -0.22808627f, 34.91864017f));
   props.I_Body = gmm2ToKgm2Matrix((Eigen::Matrix<float, 3, 3>() << 4274811.10362144f, 21823.60087554f, 202865.50474913f,
                                    21823.60087554f, 7103674.50655196f, 7275.19023018f,
                                    202865.50474913f, 7275.19023018f, 8108785.33349067f)

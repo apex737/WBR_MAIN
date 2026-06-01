@@ -241,7 +241,7 @@ class BleMotorApp(tk.Tk):
     def _on_v_change(self, val, label_widget):
         v = float(val)
         label_widget.config(text=f"{v:.2f}")
-        self.send(f"v {v:.2f}")
+        self.send(f"v {-v:.2f}")
 
     def _on_h_change(self, val, label_widget):
         v = float(val)
