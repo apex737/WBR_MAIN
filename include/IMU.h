@@ -127,7 +127,7 @@ public:
     // 단위 변환 및 보정
     acc_vec = (acc_raw_vec.cast<float>() / 16384.0f) * 9.80665f - accel_bias;
     gyr_vec = (gyr_raw_vec.cast<float>() / 131.0f) * M_PI / 180 - gyro_bias;
-
+    
     applyFilters();
 
     // 온도 변환

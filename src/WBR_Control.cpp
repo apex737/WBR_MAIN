@@ -56,6 +56,7 @@ void LogData();
 //                                    DEBUG
 // ==============================================================================
 // Off 모드에서 Height 반전문제 디버깅
+void sim_off_mode_gain();
 void dbgHeight();
 
 // ==============================================================================
@@ -224,7 +225,8 @@ void loop()
       ServoRW.sendTorqueControlCommand(0);
       u.setZero();
 
-      WIFI_Logger.handleClientRequests(); // Log Data 전송
+      // WIFI 무한루프 돌면서 찾은 뒤, RUN Mode 동안의 Log Data 전송
+      // WIFI_Logger.handleClientRequests(); 
 
       Pol.setHR(h_d, phi_d);
       Pol.calculate_com_and_inertia();
@@ -256,7 +258,7 @@ void loop()
         }
       }
 
-      dbgHeight();
+      sim_off_mode_gain();
     }
   }
 }
@@ -350,6 +352,110 @@ void LogData()
   WIFI_Logger.logValue("deg_L", deg_L);
   WIFI_Logger.logValue("angle_RH", angle_RH);
   WIFI_Logger.logValue("angle_LH", angle_LH);
+}
+
+
+void sim_off_mode_ekf_check()
+/* OFF 모드에서 EKF의 개입(왜곡) 여부 시리얼 관찰
+1. RAW 데이터(가속도, 자이로, 엔코더)가 올바른 부호를 내는지 확인
+2. EKF를 거친 결과(x)가 RAW 데이터의 경향성(부호)을 그대로 잘 따라가는지 확인
+*/
+{
+  static unsigned long last = 0;
+  if (millis() - last > 500) 
+  {
+    last = millis();
+
+    // ----------------------------------------------------
+    // [ Before EKF ] : 센서 원시 데이터 (z 벡터) 기반 임시 계산
+    // ----------------------------------------------------
+    // 1. 가속도계 기반 Pitch 추정
+    // z[8]: { acc[3], gyro[3], V_right, V_left };
+    // OFF 모드여도, 손으로 직접 밀면서 (V_right, V_left != 0) 을 만들거니까 의미가 있음
+    float raw_theta = atan2(-z(0), z(2)); 
+
+    // 2. 자이로스코프 Y축 (Pitch Rate)
+    float raw_theta_dot = z(4); 
+
+    // 3. 엔코더 기반 속도 추정
+    // 모터 속도 = 로봇 회전 각속도 - (로봇 전진 속도 / 바퀴 반지름)
+    // 따라서 v_raw = R * (raw_theta_dot - 평균 모터 회전속도)
+    float avg_motor_speed = (z(6) + z(7)) / 2.0f;
+    float raw_v = Pol.R * (raw_theta_dot - avg_motor_speed);
+
+    // ----------------------------------------------------
+    // [ 시리얼 출력 ] : Before vs After 정면 비교
+    // ----------------------------------------------------
+    Serial.println("========================================");
+    
+    // 1. 각도 비교 (가속도계 vs EKF)
+    Serial.println("[ 1. 각도 (Theta) ]");
+    Serial.printf("RAW(가속도): %+.2f deg | EKF: %+.2f deg\n", 
+                  raw_theta * 180 / M_PI, x(0) * 180 / M_PI);
+    
+    // 2. 각속도 비교 (자이로 vs EKF)
+    Serial.println("[ 2. 각속도 (Theta_dot) ]");
+    Serial.printf("RAW(자이로): %+.2f deg/s | EKF: %+.2f deg/s\n", 
+                  raw_theta_dot * 180 / M_PI, x(1) * 180 / M_PI);
+
+    // 3. 속도 비교 (엔코더 vs EKF)
+    Serial.println("[ 3. 전진 속도 (Velocity) ]");
+    Serial.printf("RAW(엔코더): %+.3f m/s | EKF: %+.3f m/s\n", 
+                  raw_v, x(2));
+                  
+    Serial.println("========================================");
+  }
+}
+
+
+void sim_off_mode_gain()
+/* OFF 모드에서 시리얼 관찰
+Step 1: 입력단(센서)의 '앞' 통일하기 
+1) 각도/각속도 확인: 로봇의 상체를 손으로 잡고 앞으로 기울입니다.
+- Pass 조건: theta 와 theta_dot 이 모두 양수(+)가 찍혀야 합니다.
+2) 엔코더 속도 확인: 상체는 세워둔 채, 바퀴를 바닥에 대고 앞으로 죽 밀어줍니다. 
+- Pass 조건: v 가 양수(+)가 찍혀야 합니다.
+
+
+Step 2: LQR 확인하기
+1) P/D항 확인: 상체를 앞으로 확 엎어뜨려 봅니다. (theta > 0, theta_dot > 0)
+- Pass 조건: u_P < 0 , u_D < 0  
+2) V항 확인: 바퀴를 앞으로 죽 밀어봅니다. 
+- Pass 조건: u_V < 0
+
+*/
+{
+  static unsigned long last = 0;
+  if (millis() - last > 500) 
+  {
+    last = millis();
+    
+    // 목표 상태 (보통 x_d = 0)
+    float err_theta = x_d(0) - x(0);
+    float err_theta_dot = x_d(1) - x(1);
+    float err_v = x_d(2) - x(2);
+
+    // K 배열의 0번째 인덱스 (h=0.13 근처의 하드코딩된 RW 게인 대략적용)
+    // offMode 실험이므로, RUN mode 게인을 대입해서 실제 거동 시뮬레이션 
+    float K0 = 1.63f; 
+    float K1 = 0.18f; 
+    float K2 = 0.23f; 
+
+    float u_P = K0 * err_theta;      // P 제어력 (각도)
+    float u_D = K1 * err_theta_dot;  // D 제어력 (각속도 댐핑)
+    float u_V = K2 * err_v;          // V 제어력 (속도 억제)
+
+    Serial.println("========================================");
+    Serial.printf("[상태 변수] theta: %+.2f | theta_dot: %+.2f | v: %+.2f\n", 
+                  x(0) * 180 / M_PI, x(1) * 180 / M_PI, x(2));
+                  
+    // P와 D가 같은 방향의 힘을 내는지(음의 피드백), 반대로 싸우는지(양의 피드백) 확인
+    /* v_d = 0인 상태입니다. 기체를 억지로 앞으로 굴렸으므로 (v > 0), 
+       LQR은 u_V 항에 음수(-)가 찍혀야 정상입니다. */
+    Serial.printf("[RW 토크 기여도] u_P(각도): %+.2f | u_D(댐핑): %+.2f | u_V(속도): %+.2f\n", 
+                  u_P, u_D, u_V);
+    Serial.println("========================================");
+  }
 }
 
 void dbgHeight()
