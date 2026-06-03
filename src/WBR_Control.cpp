@@ -226,7 +226,8 @@ void loop()
       u.setZero();
 
       // WIFI 무한루프 돌면서 찾은 뒤, RUN Mode 동안의 Log Data 전송
-      // WIFI_Logger.handleClientRequests(); 
+      // 주석처리하지 말것! : main 진입전에 죽음
+      WIFI_Logger.handleClientRequests(); 
 
       Pol.setHR(h_d, phi_d);
       Pol.calculate_com_and_inertia();
