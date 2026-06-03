@@ -7,8 +7,10 @@ git push origin HEAD:main
 git push origin HEAD         
 <!-- --set-upstream 으로 지정한 브랜치로 push -->
 git push (upstream 설정 후)  
-<!-- 브랜치 만들면서 이동 -->  
+<!-- 임시 브랜치 만들면서 이동  -->  
 git switch -c <새로운_브랜치_이름>
+<!-- 임시 브랜치 실제로 깃허브에 생성 -->  
+git push -u origin [NEW_BRANCH]
 <!-- 브랜치 삭제 (-D의 경우 강제삭제) -->  
 git branch -d <지울_브랜치_이름>
 
