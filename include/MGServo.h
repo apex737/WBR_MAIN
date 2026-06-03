@@ -186,7 +186,10 @@ private:
     iq_raw = (int16_t)(response[FRAME_COMMAND_LENGTH + 1] | (response[FRAME_COMMAND_LENGTH + 2] << 8));
     iq = static_cast<float>(iq_raw) * 3.3 / 2048;
     speed_raw = (int16_t)(response[FRAME_COMMAND_LENGTH + 3] | (response[FRAME_COMMAND_LENGTH + 4] << 8));
-    speed = static_cast<float>(speed_raw) / 10;
+    // ----------------------------------------------------
+    // [수정] 모터 물리 장착 방향 보정 (음수 부호 추가)
+    // ----------------------------------------------------
+    speed = -static_cast<float>(speed_raw) / 10;
     encoder = (uint16_t)(response[FRAME_COMMAND_LENGTH + 5] | (response[FRAME_COMMAND_LENGTH + 6] << 8));
   }
 

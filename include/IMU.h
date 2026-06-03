@@ -128,6 +128,10 @@ public:
     acc_vec = (acc_raw_vec.cast<float>() / 16384.0f) * 9.80665f - accel_bias;
     gyr_vec = (gyr_raw_vec.cast<float>() / 131.0f) * M_PI / 180 - gyro_bias;
     
+    // ----------------------------------------------------
+    // [추가] 피치 각속도 부호 일치화
+    // ----------------------------------------------------
+    gyr_vec(1) = -gyr_vec(1);
     applyFilters();
 
     // 온도 변환
