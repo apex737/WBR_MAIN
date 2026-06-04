@@ -39,7 +39,6 @@ const float MAX_TORQUE_COMMAND = 100.000;  // 최대 torque command
 // const float MAX_TORQUE = 0.48f;  // 최대 torque command
 const float MAX_TORQUE = 0.75f;  // 최대 torque command
 
-
 // 핫스팟 정보 입력 -> 정보만 입력하면 와이파이 연결 된다.
 const char* ssid = "RPI";           // 핫스팟 이름
 const char* password = "3H1F11@A38";  // 핫스팟 비밀번호
