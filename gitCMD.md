@@ -16,6 +16,8 @@ git branch -d <지울_브랜치_이름>
 <!-- 커밋 메시지 수정 -->
 git rebase -i HEAD~4   
 git push origin [BRANCH NAME] --force
+<!-- 이전 커밋으로 리턴 -->
+git reset --hard HEAD
 
 # 2. 원격 저장소의 최신 변경 사항을 모두 가져옵니다.
 git fetch --all
