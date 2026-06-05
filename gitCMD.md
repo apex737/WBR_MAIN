@@ -13,6 +13,9 @@ git switch -c <새로운_브랜치_이름>
 git push -u origin [NEW_BRANCH]
 <!-- 브랜치 삭제 (-D의 경우 강제삭제) -->  
 git branch -d <지울_브랜치_이름>
+<!-- 커밋 메시지 수정 -->
+git rebase -i HEAD~4   
+git push origin [BRANCH NAME] --force
 
 # 2. 원격 저장소의 최신 변경 사항을 모두 가져옵니다.
 git fetch --all
