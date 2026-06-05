@@ -314,6 +314,10 @@ void Ready2Log()
   WIFI_Logger.readyToLogValue("deg_L");
   WIFI_Logger.readyToLogValue("angle_RH");
   WIFI_Logger.readyToLogValue("angle_LH");
+  WIFI_Logger.readyToLogValue("u_P");
+  WIFI_Logger.readyToLogValue("u_D");
+  WIFI_Logger.readyToLogValue("u_V");
+  WIFI_Logger.readyToLogValue("u_Y");
 }
 
 void LogData()
@@ -353,6 +357,10 @@ void LogData()
   WIFI_Logger.logValue("deg_L", deg_L);
   WIFI_Logger.logValue("angle_RH", angle_RH);
   WIFI_Logger.logValue("angle_LH", angle_LH);
+  WIFI_Logger.logValue("u_P", VYB_controller.u_P);
+  WIFI_Logger.logValue("u_D", VYB_controller.u_D);
+  WIFI_Logger.logValue("u_V", VYB_controller.u_V);
+  WIFI_Logger.logValue("u_Y", VYB_controller.u_Y);
 }
 
 
