@@ -7,7 +7,7 @@ from bleak import BleakClient, BleakScanner
 DEFAULT_RX_UUID = "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 DEFAULT_TX_UUID = "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 PREFERRED_DEVICE_NAME = "ESP32_WBR_BLE"
-
+YAW_HW_BIAS = 0.03
 
 class AsyncBleWorker:
     def __init__(self, ui_log, ui_status, ui_devices):
@@ -304,6 +304,7 @@ class BleMotorApp(tk.Tk):
     def _set_yaw(self, val):
         self.yaw_var.set(val)
         self.yaw_label.config(text=f"{val:.2f}")
+        calibrated_yaw = val + YAW_HW_BIAS
         self.send(f"yaw {val:.2f}")
 
     # ── 기존 토크 제어 슬라이더 ──
