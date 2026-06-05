@@ -31,7 +31,7 @@ private:
   float saturation; ///< input saturation
   Eigen::Matrix<float, 2, 1> saturation_vec;
   const int RW_bias = 12; ///< 우측 휠 모터의 바이어스 값
-  const float V_ERR_MAX = 1.0f;
+  const float V_ERR_MAX = 1.0f; // u_V의 토크 예산 독식을 막기위한 방어장치
 
 public:
   float theta_d;
@@ -59,6 +59,9 @@ public:
     Q = diag([80.0, 0.0, 5.0, 5.0])
     R = diag([170.0, 170.0])
     v = 1.0m/s 클램핑 기준
+    100% 토크 풀파워 시 최대 복원 가능 각도: 25.28 도
+   - V항 최대 소모 예산: 0.110 Nm
+   - P항 확보 가능 예산: 0.640 Nm
     --------------------------------------------------- */
     mat << 1.04268079f, 0.14609268f, 0.11351781f, -0.11473299f,
         -1.05378950f, -0.14839968f, -0.11400699f, -0.11450148f;
