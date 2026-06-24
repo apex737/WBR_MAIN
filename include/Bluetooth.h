@@ -30,7 +30,7 @@ private:
   float _v_d = 0.0f;
   float _dpsi_d = 0.0f;
   float _phi_d = 0.0f;
-  float _h_d = 0.18f; // Params.h의 HEIGHT_MAX 등 기본값에 맞춤
+  float _h_d = 0.13f; // Params.h의 HEIGHT_MAX 등 기본값에 맞춤
 
 public:
   void begin(const char *name, MGServo *lw, MGServo *rw, HRController *h)
